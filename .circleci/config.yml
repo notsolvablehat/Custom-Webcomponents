@@ -1,1 +1,33 @@
+# CircleCI Configuration File
+
 version: 2.1
+
+jobs:
+  build-app:
+     docker:
+        - image: cimg/node:stable
+     resource_class: small
+     steps:
+        - checkout
+        - run:
+            name: Install Packages
+            command: npm install
+        - run:
+             name: Build The Application
+             command: npm run build
+  deploy-app:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+           name: Call Deploy Webhook
+           command: echo "A webhook to be called"
+
+workflows:
+  build_and_deploy:
+    jobs:
+      - build-app
+      - deploy-app:
+          requires:
+            - build-app
