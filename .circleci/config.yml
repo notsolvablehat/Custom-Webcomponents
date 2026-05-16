@@ -2,6 +2,9 @@
 
 version: 2.1
 
+orbs:
+  node: circleci/node@7.2.1
+
 jobs:
   build-app:
      docker:
@@ -9,9 +12,7 @@ jobs:
      resource_class: small
      steps:
         - checkout
-        - run:
-            name: Install Packages
-            command: npm install
+        - node/install-packages
         - run:
              name: Build The Application
              command: npm run build
