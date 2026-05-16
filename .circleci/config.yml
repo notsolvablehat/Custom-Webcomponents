@@ -8,7 +8,7 @@ orbs:
 jobs:
   build-app:
      docker:
-        - image: cimg/node:26.1.0
+        - image: cimg/node:24.13.0
      resource_class: small
      steps:
         - checkout
