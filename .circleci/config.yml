@@ -24,11 +24,22 @@ jobs:
       - run:
            name: Call Deploy Webhook
            command: echo "A webhook to be called"
+  secret-job:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Print Secret From Context
+          command: echo $PRACTICE_VARIABLE
 
 workflows:
   build_and_deploy:
     jobs:
       - build-app
+      - secret-job:
+          context:
+            - Practice Context
       - deploy-app:
           requires:
             - build-app
