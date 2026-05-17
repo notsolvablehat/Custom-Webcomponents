@@ -16,6 +16,36 @@ jobs:
         - run:
              name: Build The Application
              command: npm run build
+
+  test-app:
+    docker:
+      - image: cimg/node:24.13.0
+    resource_class: small
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - node/install-packages
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - run:
+          name: Install Browser For Playwright
+          command: npx playwright install --with-deps
+      - run:
+          name: Run Playwright Tests
+          command: npm run test:e2e
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: playwright-report
+
   deploy-app:
     docker:
       - image: cimg/base:stable
@@ -24,6 +54,7 @@ jobs:
       - run:
            name: Call Deploy Webhook
            command: echo "A webhook to be called"
+
   secret-job:
     docker:
       - image: cimg/base:stable
@@ -34,12 +65,16 @@ jobs:
           command: echo $PRACTICE_VARIABLE
 
 workflows:
-  build_and_deploy:
+  build_test_and_deploy:
     jobs:
       - build-app
       - secret-job:
           context:
             - Practice Context
+      - test-app:
+          requires:
+            - build-app
       - deploy-app:
           requires:
             - build-app
+            - test-app
